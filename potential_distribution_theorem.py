@@ -2,15 +2,18 @@ import numpy as np
 import MDAnalysis as mda
 from MDAnalysis.analysis.base import AnalysisBase
 
-def vdw_reader(path, desired_atoms, types_dic = None):
-    
-    def parser_atomtypes(line, desired_atoms, types_dic):
+
+
+def parser_atomtypes(line, desired_atoms, types_dic):
         fields = line.split()
         if fields[0] in desired_atoms:
             types_dic[fields[0]]=(fields[6], fields[7])
 
-    def fun_pass(line, desired_atoms, types_dic):
-        pass
+def fun_pass(line, desired_atoms, types_dic):
+    pass
+        
+def vdw_reader(path, desired_atoms, types_dic = None):
+    
 
     with open(path) as file:
         lines = file.readlines()
@@ -25,7 +28,8 @@ def vdw_reader(path, desired_atoms, types_dic = None):
             else:
                 parser=fun_pass
         elif line.split()[0]=="#include":
-            path_include = line.split()[1]
+            path_include = line.split()[1][1:-2]
+            print(path_include)
             types_dic = vdw_reader(path_include, desired_atoms, types_dic)
         elif line[0]==";" or line[0]=="#":
             pass
@@ -45,10 +49,11 @@ class ExcessPotential(AnalysisBase):
         self.atomtypes = np.unique(self.u.atoms.types)
         self.atom_parameters = vdw_reader(path_vdw, self.atomtypes)
         
-        
+        @classmethod
         def LJ(r, eps, sigma):
 
             return 4 * eps * ( (sigma/r)**12 - (sigma/r)**6 )
-            
+        
+
 
         
